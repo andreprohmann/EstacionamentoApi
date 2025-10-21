@@ -1,0 +1,8 @@
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.csproj.AssemblyReference.cache
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.AssemblyInfoInputs.cache
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.AssemblyInfo.cs
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.csproj.CoreCompileInputs.cache
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\andre\Documents\GitHub\EstacionamentoApi\backend\obj\Debug\net8.0\EstacionamentoApi-Net8-Clean.MvcApplicationPartsAssemblyInfo.cache
