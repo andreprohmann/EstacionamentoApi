@@ -1,21 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Vaga, getVagas, createVaga, updateVaga, deleteVaga } from '../client'
 
-function validarPlaca(p: string){ return p.trim().length >= 3 }
+
 
 export default function Vagas(){
   const [vagas, setVagas] = useState<Vaga[]>([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [idEdit, setIdEdit] = useState<number | null>(null)
+  const [placa, setPlaca] = useState('')
   const [numeroVaga, setNumeroVaga] = useState('')
   const [ocupada, setOcupada] = useState(false)
 
   const isValid = useMemo(() => {
-    const n = Number(numeroVaga)
+    
+  const n = Number(numeroVaga)
     if (!numeroVaga || Number.isNaN(n) || n <= 0) return false
     return true
-  }, [numeroVaga])
+  }, [placa, numeroVaga])
 
   async function carregar(){
     setLoading(true); setErro(null)
@@ -23,36 +25,28 @@ export default function Vagas(){
   }
   useEffect(()=>{ carregar() },[])
 
-  function resetForm(){ setIdEdit(null);  setNumeroVaga(''); setOcupada(false) }
-
-  function startEdit(v: Vaga){
-    setIdEdit(v.id ?? null)
-    setNumeroVaga(String(v.numero ?? ''))
-    setOcupada(Boolean(v.ocupada))
-  }
+  function resetForm(){ setIdEdit(null); setPlaca(''); setNumeroVaga(''); setOcupada(false) }
 
   async function onSubmit(e: React.FormEvent){
     e.preventDefault(); setErro(null)
     if(!isValid){ setErro('Preencha os campos corretamente.'); return }
     try{
-              const vaga: Vaga = { id: idEdit ?? 0, numero: numeroVaga, ocupada }
-        if (idEdit === null) {
-            await createVaga(vaga);
-        } else {
-            await updateVaga(vaga);
-        }
+      if(idEdit==null){ await createVaga({ placa:placa.trim(), numero:numeroVaga.trim(), ocupada, veiculos: null }) }
+      else { await updateVaga(idEdit,{ placa:placa.trim(), numero:numeroVaga.trim(), ocupada, veiculos: null }) }
       await carregar(); resetForm()
     }catch(e:any){ setErro(e?.message || 'Falha ao salvar') }
   }
 
-  async function remover(id:number){ if(!confirm('Confirma excluir a vaga?')) return; try{ await deleteVaga(id); await carregar(); if(idEdit===id) resetForm() } catch(e:any){ setErro(e?.message || 'Falha ao excluir') } 
-}
+  function startEdit(v: Vaga){ setIdEdit(v.id); setPlaca(v.placa); setNumeroVaga(v.numero); setOcupada(v.ocupada) }
+  async function remover(id:number){ if(!confirm('Confirma excluir a vaga?')) return; try{ await deleteVaga(id); await carregar(); if(idEdit===id) resetForm() } catch(e:any){ setErro(e?.message || 'Falha ao excluir') } }
 
   return (
     <section className="stack-lg">
       <form onSubmit={onSubmit} className="form">
         <div className="form-row">
           <div className="field">
+            <label htmlFor="placa">Placa</label>
+            <input id="placa" className="input" type="text" value={placa} onChange={e=>setPlaca(e.target.value)} placeholder="ABC-1234"/>
           </div>
           <div className="field">
             <label htmlFor="numero">Nº da Vaga</label>
@@ -81,6 +75,7 @@ export default function Vagas(){
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Placa</th>
                   <th>Nº Vaga</th>
                   <th>Ocupada</th>
                   <th className="col-actions">Ações</th>
@@ -92,6 +87,7 @@ export default function Vagas(){
                 ) : vagas.map(v => (
                   <tr key={v.id}>
                     <td>{v.id}</td>
+                    <td>{v.placa}</td>
                     <td>{v.numero}</td>
                     <td>
                       <span className={`badge ${v.ocupada?'bad':'good'}`}>{v.ocupada? 'Sim' : 'Não'}</span>
@@ -109,4 +105,4 @@ export default function Vagas(){
       </div>
     </section>
   )
-};
+}

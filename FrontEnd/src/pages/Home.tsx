@@ -11,7 +11,7 @@ export default function Home(){
     async function load(){
       setLoading(true)
       try{
-        const [v, ve] = await Promise.allSettled([getVagas(), getVeiculos()])
+        const [v, ve] = await Promise.allSettled([getVagas() /*,getVeiculos()*/])
         const vagas = v.status==='fulfilled' ? v.value.length : 0
         const veiculos = ve.status==='fulfilled' ? ve.value.length : 0
         if(alive) setKpis({ vagas, veiculos })

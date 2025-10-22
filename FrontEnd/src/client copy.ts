@@ -10,7 +10,7 @@ export interface Veiculo {
     placa: string;
     modelo: string;
     vagaId: number;
-    vaga?: Vaga; // agora opcional
+    vaga?: Vaga;
 }
 
 const API_VAGAS = '/api/vagas';
@@ -53,7 +53,7 @@ export async function getVeiculos(): Promise<Veiculo[]> {
     return await res.json();
 }
 
-export async function createVeiculo(veiculo: Omit<Veiculo, 'vaga'>): Promise<void> {
+export async function createVeiculo(veiculo: Veiculo): Promise<void> {
     const res = await fetch(API_VEICULOS, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,7 +62,7 @@ export async function createVeiculo(veiculo: Omit<Veiculo, 'vaga'>): Promise<voi
     if (!res.ok) throw new Error('Erro ao criar veículo');
 }
 
-export async function updateVeiculo(veiculo: Omit<Veiculo, 'vaga'>): Promise<void> {
+export async function updateVeiculo(veiculo: Veiculo): Promise<void> {
     const res = await fetch(`${API_VEICULOS}/${veiculo.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

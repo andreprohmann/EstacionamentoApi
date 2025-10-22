@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Vagas from './pages/Vagas'
 import Veiculos from './pages/Veiculos'
 
+
 export default function App(){
   return (
     <div className="container">
