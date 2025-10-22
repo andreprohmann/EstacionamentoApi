@@ -1,29 +1,23 @@
-# Frontend React — Estacionamento
 
-Frontend em **React + Vite + TypeScript** para a API Minimal (.NET 8) do Estacionamento.
+# Front Estacionamento (Home + Vagas + Veículos) — Estilizado
 
-## Requisitos
-- Node.js 18+ e npm
+- **Home** com KPIs e ações rápidas
+- **Vagas** (CRUD) — inputs controlados, validação e tabela
+- **Veículos** (CRUD) — formulário completo (placa, marca, modelo, cor, ano, observações)
 
-## Rodar local
+## Rodar
 ```bash
-cd estacionamento-web
-cp .env.example .env     # ajuste a URL da API se necessário
-npm install
+npm i
 npm run dev
 ```
-Acesse: http://localhost:5173
 
-## Build de produção
-```bash
-npm run build
-npm run preview
-```
+## API
+- Proxy do Vite encaminha `/api` para `https://localhost:5001` (certificado de dev aceito).
+- Alternativa: `.env` com `VITE_API_URL=https://localhost:5001` para usar base direta.
 
-## Configurar API base
-Edite `.env`:
-```
-VITE_API_BASE_URL=http://localhost:5000
-```
+## Rotas
+- `/` — Home
+- `/vagas` — Vagas
+- `/veiculos` — Veículos
 
-> Certifique-se de que sua API .NET esteja rodando e acessível.
+> As chamadas de **Veículos** esperam endpoints REST em `/api/Veiculos` (GET/POST/PUT/DELETE). Ajuste `src/client.ts` se sua API usar outro caminho/nome.

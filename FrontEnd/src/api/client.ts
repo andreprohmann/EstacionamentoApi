@@ -1,6 +1,6 @@
 
 // Usando proxy do Vite: chamadas relativas (sem base URL)
-const API_BASE = ''
+const API_BASE = 'http://localhost:5000/api'
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 

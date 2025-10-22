@@ -1,116 +1,108 @@
-import { useEffect, useState } from 'react'
-import api from '../api/client'
-import type { Vaga } from '../types'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Vaga, getVagas, createVaga, updateVaga, deleteVaga } from '../client'
+
+function validarPlaca(p: string){ return p.trim().length >= 3 }
 
 export default function Vagas(){
   const [vagas, setVagas] = useState<Vaga[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [idEdit, setIdEdit] = useState<number | null>(null)
+  const [placa, setPlaca] = useState('')
+  const [numeroVaga, setNumeroVaga] = useState('')
+  const [ocupada, setOcupada] = useState(false)
 
-  const [form, setForm] = useState<{numero: string, nivel?: string, ativa: boolean}>({ numero:'', nivel:'', ativa: true })
-  const [editId, setEditId] = useState<number | null>(null)
+  const isValid = useMemo(() => {
+    if (!validarPlaca(placa)) return false
+    const n = Number(numeroVaga)
+    if (!numeroVaga || Number.isNaN(n) || n <= 0) return false
+    return true
+  }, [placa, numeroVaga])
 
-  async function load(){
-    setLoading(true)
-    setError('')
-    try {
-      const data = await api.listVagas()
-      setVagas(data)
-    } catch (e:any){ setError(e.message) }
-    finally { setLoading(false) }
+  async function carregar(){
+    setLoading(true); setErro(null)
+    try{ setVagas(await getVagas()) } catch(e:any){ setErro(e?.message || 'Erro ao carregar vagas') } finally { setLoading(false) }
   }
+  useEffect(()=>{ carregar() },[])
 
-  useEffect(()=>{ load() }, [])
+  function resetForm(){ setIdEdit(null); setPlaca(''); setNumeroVaga(''); setOcupada(false) }
 
-  async function create(){
-    if(!form.numero.trim()) { alert('Número é obrigatório'); return }
+  async function onSubmit(e: React.FormEvent){
+    e.preventDefault(); setErro(null)
+    if(!isValid){ setErro('Preencha os campos corretamente.'); return }
     try{
-      await api.createVaga({ numero: form.numero.trim(), nivel: form.nivel || undefined, ativa: form.ativa })
-      setForm({ numero:'', nivel:'', ativa:true })
-      await load()
-    }catch(e:any){ alert(e.message) }
+      if(idEdit==null){ await createVaga({ placa:placa.trim(), numeroVaga:Number(numeroVaga), ocupada }) }
+      else { await updateVaga(idEdit,{ placa:placa.trim(), numeroVaga:Number(numeroVaga), ocupada }) }
+      await carregar(); resetForm()
+    }catch(e:any){ setErro(e?.message || 'Falha ao salvar') }
   }
 
-  async function startEdit(v: Vaga){
-    setEditId(v.id)
-    setForm({ numero: v.numero, nivel: v.nivel || '', ativa: v.ativa })
-  }
-
-  async function update(){
-    if(editId==null) return
-    try{
-      await api.updateVaga(editId, { numero: form.numero, nivel: form.nivel, ativa: form.ativa })
-      setEditId(null)
-      setForm({ numero:'', nivel:'', ativa:true })
-      await load()
-    }catch(e:any){ alert(e.message) }
-  }
-
-  async function remove(id:number){
-    if(!confirm('Excluir esta vaga?')) return
-    try{ await api.deleteVaga(id); await load() }catch(e:any){ alert(e.message) }
-  }
+  function startEdit(v: Vaga){ setIdEdit(v.id); setPlaca(v.placa); setNumeroVaga(String(v.numeroVaga)); setOcupada(v.ocupada) }
+  async function remover(id:number){ if(!confirm('Confirma excluir a vaga?')) return; try{ await deleteVaga(id); await carregar(); if(idEdit===id) resetForm() } catch(e:any){ setErro(e?.message || 'Falha ao excluir') } }
 
   return (
-    <div className="panel">
-      <h2 style={{marginTop:0}}>Vagas</h2>
-
-      <div className="row">
-        <div>
+    <section className="stack-lg">
+      <form onSubmit={onSubmit} className="form">
+        <div className="form-row">
           <div className="field">
-            <label>Número</label>
-            <input value={form.numero} onChange={e=>setForm({...form, numero:e.target.value.toUpperCase()})} placeholder="Ex: A-01" />
+            <label htmlFor="placa">Placa</label>
+            <input id="placa" className="input" type="text" value={placa} onChange={e=>setPlaca(e.target.value)} placeholder="ABC-1234" required/>
           </div>
           <div className="field">
-            <label>Nível</label>
-            <input value={form.nivel} onChange={e=>setForm({...form, nivel:e.target.value})} placeholder="Ex: Térreo, -1..." />
+            <label htmlFor="numero">Nº da Vaga</label>
+            <input id="numero" className="input" type="number" value={numeroVaga} onChange={e=>setNumeroVaga(e.target.value)} min={1} required/>
           </div>
-          <div className="field">
-            <label>
-              <input type="checkbox" checked={form.ativa} onChange={e=>setForm({...form, ativa:e.target.checked})}/> Ativa
+          <div className="field checkbox">
+            <label className="checkbox-label">
+              <input type="checkbox" checked={ocupada} onChange={e=>setOcupada(e.target.checked)} />
+              <span>Ocupada</span>
             </label>
           </div>
-          {editId==null ? (
-            <button className="btn primary" onClick={create}>Criar vaga</button>
-          ) : (
-            <div className="flex">
-              <button className="btn ok" onClick={update}>Salvar</button>
-              <button className="btn" onClick={()=>{ setEditId(null); setForm({numero:'', nivel:'', ativa:true}) }}>Cancelar</button>
-            </div>
-          )}
         </div>
-        <div>
-          {loading ? <p>Carregando...</p> : error ? <p style={{color:'#fca5a5'}}>{error}</p> : (
+        {erro && <div className="alert error">{erro}</div>}
+        <div className="actions">
+          <button type="submit" className="btn primary" disabled={!isValid}>{idEdit==null? 'Criar' : 'Salvar alterações'}</button>
+          {idEdit!=null && <button type="button" className="btn ghost" onClick={resetForm}>Cancelar</button>}
+        </div>
+      </form>
+
+      <div className="table-card">
+        {loading ? (
+          <div className="skeleton lg" aria-busy="true" aria-label="Carregando"></div>
+        ) : (
+          <div className="table-responsive">
             <table className="table">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Número</th>
-                  <th>Nível</th>
-                  <th>Status</th>
-                  <th></th>
+                  <th>Placa</th>
+                  <th>Nº Vaga</th>
+                  <th>Ocupada</th>
+                  <th className="col-actions">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {vagas.map(v => (
+                {vagas.length===0 ? (
+                  <tr><td colSpan={5} className="empty">Nenhuma vaga cadastrada.</td></tr>
+                ) : vagas.map(v => (
                   <tr key={v.id}>
                     <td>{v.id}</td>
-                    <td>{v.numero}</td>
-                    <td>{v.nivel || '-'}</td>
+                    <td>{v.placa}</td>
+                    <td>{v.numeroVaga}</td>
                     <td>
-                      {v.ativa ? <span className="status ok">Ativa</span> : <span className="status bad">Inativa</span>}
+                      <span className={`badge ${v.ocupada?'bad':'good'}`}>{v.ocupada? 'Sim' : 'Não'}</span>
                     </td>
-                    <td>
-                      <button className="btn" onClick={()=>startEdit(v)}>Editar</button>
-                      <button className="btn danger" onClick={()=>remove(v.id)}>Excluir</button>
+                    <td className="row-actions">
+                      <button type="button" className="btn small" onClick={()=>startEdit(v)}>Editar</button>
+                      <button type="button" className="btn small danger" onClick={()=>remover(v.id)}>Excluir</button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   )
 }

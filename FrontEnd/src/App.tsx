@@ -1,31 +1,28 @@
-import { NavLink, Route, Routes, Navigate } from 'react-router-dom'
+import React from 'react'
+import { NavLink, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Vagas from './pages/Vagas'
 import Veiculos from './pages/Veiculos'
 
 export default function App(){
   return (
-    <div>
-      <header>
-        <div className="container" style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
-          <h1 style={{fontSize:18, margin:0}}>🚗 Estacionamento</h1>
-          <nav>
-            <NavLink to="/" end>Início</NavLink>
-            <NavLink to="/vagas">Vagas</NavLink>
-            <NavLink to="/veiculos">Veículos</NavLink>
-          </nav>
-        </div>
+    <div className="container">
+      <header className="header">
+        <div className="brand">Estacionamento</div>
+        <nav className="nav">
+          <NavLink to="/" end className={({isActive})=>`nav-link ${isActive?'active':''}`}>Home</NavLink>
+          <NavLink to="/vagas" className={({isActive})=>`nav-link ${isActive?'active':''}`}>Vagas</NavLink>
+          <NavLink to="/veiculos" className={({isActive})=>`nav-link ${isActive?'active':''}`}>Veículos</NavLink>
+        </nav>
       </header>
-      <main>
-        <div className="container" style={{paddingTop:20}}>
-          <Routes>
-            <Route path="/" element={<Home/>}/>
-            <Route path="/vagas" element={<Vagas/>}/>
-            <Route path="/veiculos" element={<Veiculos/>}/>
-            <Route path="*" element={<Navigate to="/"/>}/>
-          </Routes>
-        </div>
+      <main className="content">
+        <Routes>
+          <Route path="/" element={<Home/>} />
+          <Route path="/vagas" element={<Vagas/>} />
+          <Route path="/veiculos" element={<Veiculos/>} />
+        </Routes>
       </main>
+      <footer className="footer">© {new Date().getFullYear()} Estacionamento</footer>
     </div>
   )
 }

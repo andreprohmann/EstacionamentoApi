@@ -1,4 +1,3 @@
-
 namespace EstacionamentoApi.Models;
 
 public class Veiculo

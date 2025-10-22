@@ -1,78 +1,44 @@
 
-# EstacionamentoApi (Minimal API .NET 8 + EF Core + MySQL)
+# EstacionamentoApi (exemplo com Vagas)
 
-CRUD de **Veículos** relacionado a **Vagas** com regra de negócio que impede duas entidades usarem a mesma vaga simultaneamente.
+API ASP.NET Core com endpoints de **GET/POST/PUT/DELETE** para `Vagas`, Swagger habilitado e CORS liberado para desenvolvimento.
 
-## Pré-requisitos
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download)
-- MySQL 8.x (local ou Docker)
-- CLI do EF Core:
-  ```bash
-  dotnet tool install --global dotnet-ef
-  ```
+## Como rodar
 
-## Configurar conexão
-Edite `appsettings.json` e ajuste a **ConnectionStrings:Default**:
-```json
-"Server=localhost;Port=3306;Database=EstacionamentoDb;User Id=seu_usuario;Password=sua_senha;"
-```
-
-> Dica: com o **Pomelo.EntityFrameworkCore.MySql**, `ServerVersion.AutoDetect` descobre a versão do MySQL a partir da connection string.
-
-## Subir MySQL com Docker (opcional)
-Arquivo `docker-compose.yml` incluído. Para subir:
 ```bash
-docker compose up -d
-```
-Credenciais padrão:
-- servidor: `localhost:3307`
-- db: `EstacionamentoDb`
-- usuário: `dev`
-- senha: `devpass`
-
-Neste caso, use a string:
-```json
-"Server=localhost;Port=3307;Database=EstacionamentoDb;User Id=dev;Password=devpass;"
-```
-
-## Criar banco (EF Core Migrations)
-```bash
+# Requisitos: .NET 8 SDK
 cd EstacionamentoApi
-# criar primeira migration
-dotnet ef migrations add InitialCreate
-# aplicar
-dotnet ef database update
-```
 
-## Rodar
-```bash
+# Restore e run
+dotnet restore
 dotnet run
 ```
-Abra o Swagger: `http://localhost:5080/swagger` (a porta exata aparece no console).
 
-## Endpoints principais
-- `GET /vagas` | `POST /vagas` | `PUT /vagas/{id}` | `DELETE /vagas/{id}`
-- `GET /veiculos` | `POST /veiculos` | `PUT /veiculos/{id}` | `DELETE /veiculos/{id}`
-- `POST /veiculos/{id}/ocupar/{vagaId}`
-- `POST /veiculos/{id}/liberar`
+Acesse o Swagger:
+- https://localhost:5001/swagger
+- ou http://localhost:5000/swagger
 
-### Observações
-- `Placa` e `Numero` são únicos.
-- `VagaId` em veículo é **opcional**; validações garantem que uma vaga não seja ocupada por dois veículos.
-- Ao apagar uma **Vaga**, os veículos vinculados têm o FK definido como **NULL**.
+## Endpoints
+- `GET    /api/Vagas`
+- `GET    /api/Vagas/{id}`
+- `POST   /api/Vagas`
+- `PUT    /api/Vagas/{id}`
+- `DELETE /api/Vagas/{id}`
 
-## Exemplo de atualização para mover/liberar veículo
-Mover para a vaga 1:
-```json
-{
-  "vagaId": 1,
-  "vagaIdHasValue": true
-}
+## Exemplos (curl)
+
+```bash
+# Criar (POST)
+curl -k -i -X POST https://localhost:5001/api/Vagas   -H "Content-Type: application/json"   -d '{"placa":"ABC-1234","numeroVaga":10,"ocupada":false}'
+
+# Atualizar (PUT)
+curl -k -i -X PUT https://localhost:5001/api/Vagas/1   -H "Content-Type: application/json"   -d '{"placa":"DEF-5678","ocupada":true}'
+
+# Excluir (DELETE)
+curl -k -i -X DELETE https://localhost:5001/api/Vagas/1
 ```
-Liberar a vaga:
-```json
-{
-  "vagaId": null,
-  "vagaIdHasValue": true
-}
-```
+
+## Observações
+- O armazenamento é **em memória** (perde ao reiniciar).
+- Ajuste o front para usar a mesma base URL/rota do Swagger (ex.: `https://localhost:5001/api/Vagas`).
+- Se tiver erro de certificado HTTPS em dev: `dotnet dev-certs https --trust`.
